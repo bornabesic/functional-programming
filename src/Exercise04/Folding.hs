@@ -1,8 +1,10 @@
 module Exercise04.Folding where
 
+foldr' :: (a -> b -> b) -> b -> [a] -> b
 foldr' _ acc [] = acc
 foldr' func acc (x:xs) = foldr' func (func x acc) xs
 
+foldl' :: (b -> a -> b) -> b -> [a] -> b
 foldl' _ acc [] = acc
 foldl' func acc (x:xs) = foldl' func (func acc x) xs
 
@@ -25,6 +27,7 @@ map'' mapFunc list = foldr' func [] list
 
 -- foldl defined using foldr:
 -- Just switch the accumulator and the element
+foldl'' :: (b -> a -> b) -> b -> [a] -> b
 foldl'' func acc list = foldr' funcRight acc list 
     where funcRight acc x = func x acc 
 
