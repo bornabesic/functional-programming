@@ -1,3 +1,4 @@
 .stack-work/
 functional-programming.cabal
 *~
+output.svg
