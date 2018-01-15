@@ -10,6 +10,10 @@ import Data.Text
 
 data Picture = Picture [Element']
 
+instance Monoid Picture where
+    mappend (Picture es1) (Picture es2) = Picture (es1++es2)
+    mempty = Picture [] 
+
 data Element' = 
     Line {
         lineStart :: Vector Double,
@@ -68,11 +72,6 @@ drawElement element = f (elem ++ [
     ])
     where (elem, f) = svgize element
 
-{--drawPicture :: Picture -> Element
-drawPicture (Last element) = drawElement element
-drawPicture (More element rest) = (drawElement element) <> (drawPicture rest)
---}
-
 drawPicture :: Picture -> Element
 drawPicture (Picture (e:es)) = Prelude.foldr foldFunc (drawElement e) es
     where foldFunc element acc = (drawElement element) <> acc
@@ -129,7 +128,7 @@ myRektangle = Rectangle (Vector 0 0) 20 20
 myTriangle = Triangle (Vector 10 10) (Vector 0 20) (Vector 60 20)
 myCircle = Circle (Vector 50 50) 10
 
-myPicture = [myLine, myRektangle, myTriangle, myCircle]
+myPicture = Picture [myLine, myRektangle, myTriangle, myCircle]
 
 -- TODO dragon :: Int -> Picture
 
