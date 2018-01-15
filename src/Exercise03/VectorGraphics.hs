@@ -8,7 +8,7 @@ import Data.Text
 
 -- Data types
 
-data Picture = Last Element' | More Element' Picture
+data Picture = Picture [Element']
 
 data Element' = 
     Line {
@@ -68,32 +68,49 @@ drawElement element = f (elem ++ [
     ])
     where (elem, f) = svgize element
 
-drawPicture :: Picture -> Element
+{--drawPicture :: Picture -> Element
 drawPicture (Last element) = drawElement element
 drawPicture (More element rest) = (drawElement element) <> (drawPicture rest)
+--}
 
--- TODO Transformations
+drawPicture :: Picture -> Element
+drawPicture (Picture (e:es)) = Prelude.foldr foldFunc (drawElement e) es
+    where foldFunc element acc = (drawElement element) <> acc
 
--- move :: (Double, Double) -> Picture -> Picture
--- scale :: Double -> Picture -> Picture
--- rotate :: (Double, Double) -> Double -> Picture -> Picture
+-- Transformations
+
+moveElement :: (Double, Double) -> Element' -> Element'
+moveElement (dx, dy) element = case element of
+    (Line start end) -> Line (start + translateVector) (end + translateVector)
+    (Rectangle start width height) -> Rectangle (start + translateVector) width height
+    (Circle center radius) -> Circle (center + translateVector) radius
+    (Triangle a b c) -> Triangle (a + translateVector) (b + translateVector) (c + translateVector)
+    where translateVector = Vector dx dy
+
+move :: (Double, Double) -> Picture -> Picture
+move d (Picture es) = Picture $ Prelude.map (moveElement d) es
+
+-- TODO scale :: Double -> Picture -> Picture
+-- TODO rotate :: (Double, Double) -> Double -> Picture -> Picture
 
 -- Examples
 
 triangleCube :: Double -> Picture
-triangleCube sideLen =
-    More (Rectangle (Vector 0 0) sideLen sideLen) $
-    Last (
+triangleCube sideLen = Picture [
+    (Rectangle (Vector 0 0) sideLen sideLen),
+    (
         Triangle (Vector 0 sideLen)
         (Vector sideLen sideLen)
         (Vector (sideLen/2) 0)
         )
+    ]
 
 house :: Double -> Picture
-house sideLen =
-    More t $
-    More (Circle (triangleCenter t) (sideLen/4)) $
-    Last (Rectangle (Vector 0 sideLen) sideLen sideLen)
+house sideLen = Picture [
+        t,
+        (Circle (triangleCenter t) (sideLen/4)),
+        (Rectangle (Vector 0 sideLen) sideLen sideLen)
+    ]
     where t = Triangle (Vector (sideLen/2) 0) (Vector 0 sideLen) (Vector sideLen sideLen)
 
 myLine = Line (Vector 0 0) (Vector 100 100)
@@ -101,14 +118,11 @@ myRektangle = Rectangle (Vector 0 0) 20 20
 myTriangle = Triangle (Vector 10 10) (Vector 0 20) (Vector 60 20)
 myCircle = Circle (Vector 50 50) 10
 
-myPicture = More myLine $
-            More myRektangle $
-            More myTriangle $
-            Last myCircle
+myPicture = [myLine, myRektangle, myTriangle, myCircle]
 
 -- TODO dragon :: Int -> Picture
 
 -- Output
 
-svg = doctype <> with (svg11_ (drawPicture (house 50))) [Width_ <<- "100", Height_ <<- "100"]
+svg = doctype <> with (svg11_ (drawPicture (move (20, 20) (house 50)))) [Width_ <<- "100", Height_ <<- "100"]
 mainSVG = renderToFile "output.svg" svg
