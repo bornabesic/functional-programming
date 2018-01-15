@@ -79,6 +79,7 @@ drawPicture (Picture (e:es)) = Prelude.foldr foldFunc (drawElement e) es
 
 -- Transformations
 
+-- Move
 moveElement :: (Double, Double) -> Element' -> Element'
 moveElement (dx, dy) element = case element of
     (Line start end) -> Line (start + translateVector) (end + translateVector)
@@ -90,7 +91,17 @@ moveElement (dx, dy) element = case element of
 move :: (Double, Double) -> Picture -> Picture
 move d (Picture es) = Picture $ Prelude.map (moveElement d) es
 
--- TODO scale :: Double -> Picture -> Picture
+-- Scale
+scaleElement :: Double -> Element' -> Element'
+scaleElement s element = case element of
+    (Line (Vector xs ys) (Vector xe ye)) -> Line (Vector (s*xs) (s*ys)) (Vector (s*xe) (s*ye))
+    (Rectangle (Vector xs ys) width height) -> Rectangle (Vector (s*xs) (s*ys)) (s*width) (s*height)
+    (Circle (Vector xc yc) radius) -> Circle (Vector (s*xc) (s*yc)) (radius*s)
+    (Triangle (Vector x1 y1) (Vector x2 y2) (Vector x3 y3)) -> Triangle (Vector (s*x1) (s*x2)) (Vector (s*x2) (s*y2)) (Vector (s*x3) (s*y3))
+
+scale :: Double -> Picture -> Picture
+scale s (Picture es) = Picture $ Prelude.map (scaleElement s) es 
+
 -- TODO rotate :: (Double, Double) -> Double -> Picture -> Picture
 
 -- Examples
@@ -124,5 +135,5 @@ myPicture = [myLine, myRektangle, myTriangle, myCircle]
 
 -- Output
 
-svg = doctype <> with (svg11_ (drawPicture (move (20, 20) (house 50)))) [Width_ <<- "100", Height_ <<- "100"]
+svg = doctype <> with (svg11_ (drawPicture (Exercise03.VectorGraphics.scale 0.5 (house 50)))) [Width_ <<- "100", Height_ <<- "100"]
 mainSVG = renderToFile "output.svg" svg
