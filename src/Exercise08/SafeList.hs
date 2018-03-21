@@ -14,6 +14,10 @@ data SafeList t k where
     Cons :: t -> SafeList t k -> SafeList t NonEmptyList
     Nil :: SafeList t EmptyList
 
+instance (Show t) => Show (SafeList t k) where
+    show (Cons e r) = (show e) ++ " " ++ (show r)
+    show Nil = ""
+
 safeHead :: SafeList t NonEmptyList -> t
 safeHead (Cons x _) = x
 
@@ -23,10 +27,12 @@ Does not compile
 example2 = safeHead Nil
 --}
 
--- TODO
--- safeDrop :: Int -> SafeList t NonEmptyList -> SafeList t NonEmptyList
--- safeDrop 0 list = list
--- safeDrop n (Cons element rest) = safeDrop (n - 1) rest 
+safeDrop :: Int -> SafeList t NonEmptyList -> SafeList t NonEmptyList
+safeDrop 0 list = list
+safeDrop n list@(Cons element Nil) = list -- TODO problematic
+safeDrop n (Cons element rest@(Cons _ _)) = safeDrop (n - 1) rest
 
-
--- TODO: safeAppend
+safeAppend :: t -> SafeList t k -> SafeList t NonEmptyList
+safeAppend element Nil = Cons element Nil
+safeAppend element (Cons element' Nil) = Cons element' (Cons element Nil)
+safeAppend element (Cons element' rest) = Cons element' (safeAppend element rest)
