@@ -27,6 +27,8 @@ dependencies:
 - svg-builder
 - transformers
 - mtl
+- time
+- unix
 
 library:
   source-dirs: src
