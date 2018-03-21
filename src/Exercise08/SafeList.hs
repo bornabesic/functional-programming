@@ -23,6 +23,10 @@ Does not compile
 example2 = safeHead Nil
 --}
 
+-- TODO
+-- safeDrop :: Int -> SafeList t NonEmptyList -> SafeList t NonEmptyList
+-- safeDrop 0 list = list
+-- safeDrop n (Cons element rest) = safeDrop (n - 1) rest 
 
--- TODO: safeDrop
+
 -- TODO: safeAppend
