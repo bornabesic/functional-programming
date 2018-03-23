@@ -39,14 +39,19 @@ pIntList = pure (++)
            <*> pmany (lit ',' *> pInt)     
            <* lit ']'
 
-{--
-
-TODO:
-
-pPaliAB :: Parser Char String
-
+-- Recognizes palindromes of elements that p accepts
 pPali :: (Eq r) => Parser t r -> Parser t [r]
+pPali p = pure (\r ->
+              if r == reverse r
+              then r
+              else []
+          )
+          <*> psome p
 
+-- Recognize palindromes made out of characters 'a' and 'b'
+pPaliAB :: Parser Char String
+pPaliAB = pPali (lit 'a' <|> lit 'b')
+
+-- Recognize twice
 pTwice :: (Eq t) => Parser t [t] -> Parser t [t]
-
---}
+pTwice p = pure (\r -> r ++ r) <*> p
